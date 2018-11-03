@@ -60,7 +60,7 @@ var doChartStuff = function () {
 document.addEventListener("DOMContentLoaded", function() {
 
 	$('#chart').html(
-		'<a-scene id="main" background="color: #000000">'+
+		'<a-scene embedded id="main" background="color: #000000">'+
 			'<a-box id="aBar" position="-1 0.125 -3" rotation="0 0 0" scale="1 .25 1" color="#4CC3D9"></a-box>'+
 			'<a-box id="bBar" position="1 0.125 -3" rotation="0 0 0" scale="1 .25 1" color="#FFC65D"></a-box>'+
 			'<a-plane position="0 0 -4" rotation="-90 0 0" width="10" height="4" color="#515151" shadow></a-plane>'+
