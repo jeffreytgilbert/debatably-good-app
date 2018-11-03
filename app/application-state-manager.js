@@ -3,7 +3,7 @@
 let debateAppIndex = {};
 const createDebate = require('./debates').createDebate;
 
-module.exports = {
+const asm = {
 	add: function (sessionCode, topic, nameA, nameB, duration, userId) {
 		debateAppIndex[sessionCode] = createDebate(sessionCode, topic, nameA, nameB, duration, userId);
 		return debateAppIndex[sessionCode];
@@ -11,6 +11,15 @@ module.exports = {
 
 	get: function (sessionCode) {
 		return debateAppIndex[sessionCode];
+	},
+
+	deleteAllDebatesForThisModerator: function (userId) {
+		for (let sessionCode in debateAppIndex) {
+			let debate = debateAppIndex[sessionCode];
+			if (debate.getModeratorId() === userId) {
+				asm.delete(sessionCode);
+			}
+		}
 	},
 
 	// get debates that are running but not completed.
@@ -42,3 +51,5 @@ module.exports = {
 		return true;
 	}
 };
+
+module.exports = asm;

@@ -254,20 +254,27 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	window['debugSocket'] = socket;
 
+	$('#joinLocation').text(' '+location.host+' ');
+
+	var handleSocketClosed = (evt) => {
+		console.log('Session closed', evt);
+		errorHandler();
+	};
+
+	var handleSocketError = (errEvt) => {
+		console.log('error', errEvt);
+		errorHandler();
+	};
+
 	// Listen for messages
 	socket.addEventListener('message', (msgEvt) => {
-
-		console.log('got a message');
 
 		if (msgEvt.data) {
 
 			var event = JSON.parse(msgEvt.data);
 
-			console.log(event);
-
 			switch (event.type) {
 				case 'moderator-update':
-					console.log('updating moderator');
 
 					// expected format is {started:bool, completed:bool, timeRemaining:ms}
 					var debateDetails = event.data.debateDetails;
@@ -298,6 +305,13 @@ document.addEventListener("DOMContentLoaded", function() {
 					var secondsRemaining = Math.round(debateDetails.timeRemaining/1000);
 					if (secondsRemaining < 0) {
 						$('#timeRemaining').text('Done! Fin!');
+						var request = {
+							"type":"close-debate"
+						};
+						socket.removeEventListener('close', handleSocketClosed);
+						socket.removeEventListener('error', handleSocketError);
+						socket.send(JSON.stringify(request));
+						socket.close();
 					} else {
 						$('#timeRemaining').text(secondsRemaining + ' seconds remaining.');
 					}
@@ -308,18 +322,10 @@ document.addEventListener("DOMContentLoaded", function() {
 					break;
 			}
 		}
-		console.log('Message from server ', event.data);
 	});
 
-	socket.addEventListener('close', (evt) => {
-		console.log('Session closed', evt);
-		errorHandler();
-	});
-
-	socket.addEventListener('error', (errEvt) => {
-		console.log('error', errEvt);
-		errorHandler();
-	});
+	socket.addEventListener('close', handleSocketClosed);
+	socket.addEventListener('error', handleSocketError);
 
 	$('#startDebate').on('click', () => {
 		socket.send('{"type":"start-session"}');

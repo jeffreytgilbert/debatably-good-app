@@ -32,7 +32,7 @@ router.get('/', function(req, res, next) {
 						title: debate.topic,
 						participantA: debate.getParticipants()[0],
 						participantB: debate.getParticipants()[1],
-						undecided: debate.undecided,
+						undecided: debate.undecided.name,
 						voterName: voter.name
 					});
 				} else {

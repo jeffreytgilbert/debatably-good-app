@@ -20,8 +20,6 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 
 	const __ = this;
 
-	console.log('sessionCode, topic, nameA, nameB, duration, moderatorId', sessionCode, topic, nameA, nameB, duration, moderatorId);
-
 	// sessionCode never changes
 	// nameA never changes
 	// nameB never changes
@@ -82,14 +80,9 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 			totals[undecided.name] = 0;
 
 			votes.forEach((vote, i, arr) => {
-				console.log('calculateVotes', vote, i, arr);
 				const endTime = typeof arr[i+1] !== 'undefined' ? arr[i+1].time : Date.now();
-				console.log(vote.time, endTime, Date.now());
-				console.log(arr[i+1]);
 				totals[vote.opinion] = endTime - vote.time;
 			});
-
-			console.log(totals);
 
 			return totals;
 		};
@@ -124,8 +117,6 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 						break;
 				}
 
-				console.log('All votes: ', participant, votes.length);
-
 				return true;
 			} else {
 				return false;
@@ -152,13 +143,12 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 
 		audience.forEach(voter => {
 			const voterTotals = voter.calculateVotes();
-			console.log('voterTotals', voterTotals);
 			debateTotals.participantA.total += voterTotals[participantA.name];
 			debateTotals.participantB.total += voterTotals[participantB.name];
 			debateTotals.undecided.total += voterTotals[undecided.name];
 		});
 
-		console.log(debateTotals);
+//		console.log(debateTotals);
 
 		return debateTotals;
 	};
@@ -193,14 +183,9 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 		});
 
 		timeoutInstance = setTimeout(function() {
-			clearInterval(interval);
 			__.endDebate(cb);
 		}, allowedDuration);
 
-		// debuggy stuff
-		let interval = setInterval(function () {
-			console.log('Time left in debate ',sessionCode , (startTime+allowedDuration) - Date.now());
-		}, 1000);
 		console.log('the debate has started');
 	};
 

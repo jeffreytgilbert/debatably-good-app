@@ -38,9 +38,7 @@ const SocketServer = WebSocket.Server;
 // Give the socket server lib for the http server to use as its connection proxy
 const wss = new SocketServer({
 	verifyClient: (info, done) => {
-		console.log('Parsing session from request...');
 		sessionParser(info.req, {}, () => {
-			console.log('Session is parsed!');
 			// We can reject the connection by returning false to done(). For example,
 			// reject here if user is unknown.
 
@@ -136,7 +134,7 @@ const updateSessions = () => {
 		socketConnections.forEach(connectedUser => {
 			if (connectedUser.user.isModerator && debate.getModeratorId() === connectedUser.user.userId) {
 				if (connectedUser.ws.readyState === WebSocket.OPEN) {
-					console.log('updating ', debate.sessionCode, 'for', debate.getModeratorId());
+					console.log('updating', debate.sessionCode, 'for', debate.getModeratorId());
 					const message = JSON.stringify({
 						type: 'moderator-update', 
 						data: { 
@@ -177,22 +175,15 @@ const endDebate = (debate) => {
 };
 
 setInterval(() => {
-	//	console.log('update sessions', Date.now());
+	// console.log('update sessions', Date.now());
 		updateSessions();
-	}, 2000
+	}, 200
 );
 
 /**
  *  MANAGE ALL INBOUND COMMUNICATION
- * */ 
-
-// on connection is different than on open in that you get request info 
-// you can use to parse things like session cookies and such, which we do and store.
-wss.on('connection', (ws, req) => {
-	console.log('got a connection');
-
-	const session = req.session;
-	const debate = asm.get(session.sessionCode);
+ * */
+const socketRequestHandler = (ws, session, debate) => {
 
 	const user = new ConnectedUser(
 		!!(session.voterId),
@@ -201,7 +192,6 @@ wss.on('connection', (ws, req) => {
 		debate
 	);
 
-	console.log('adding a session to the SessionToSocketMap');
 	socketConnections.push(new SessionToSocketMap(ws, user));
 
 	console.log(
@@ -213,7 +203,6 @@ wss.on('connection', (ws, req) => {
 	);
 
 	ws.on('message', (data) => {
-		console.log('got a message');
 
 		const event = JSON.parse(data.toString());
 
@@ -222,11 +211,14 @@ wss.on('connection', (ws, req) => {
 		if (user.isModerator) {
 			switch (event.type) {
 				case 'start-session': 
-					console.log('Starting the session', debate.sessionCode);
 					debate.startDebate(function endDebateCallback() {
 						endDebate(debate);
 					});
 					startDebate(debate);
+					break;
+				case 'close-debate':
+				case 'close-any-existing-debates':
+					asm.deleteAllDebatesForThisModerator(user.userId);
 					break;
 				default:
 					console.log('Unkown event type received:', event.type);
@@ -266,7 +258,23 @@ wss.on('connection', (ws, req) => {
 		console.log('error', error);
 		removeBadConnections(ws);
 	});
+};
 
+// on connection is different than on open in that you get request info 
+// you can use to parse things like session cookies and such, which we do and store.
+wss.on('connection', (ws, req) => {
+	console.log('got a connection');
+
+	const session = req.session;
+
+	// Ops that go with socket functionality require the user to have a sessionCode
+	if (session.sessionCode) { 
+		const debate = asm.get(session.sessionCode);
+		if (debate && debate.sessionCode) {
+			socketRequestHandler(ws, session, debate);
+		}
+	}
+	
 });
 
 module.exports = { 
