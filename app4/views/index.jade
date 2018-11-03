@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1= title
+  form(action="/join-session", method="get") 
+    p
+      input(type="text", placeholder="What's the room code?", name="sessionCode")
+    p
+      input(type="text", placeholder="What's your name?" name="name")
+    p
+      input(type="submit", value="Join")
+
+script(src="/javascripts/index.js")

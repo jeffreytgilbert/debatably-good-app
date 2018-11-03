@@ -1,0 +1,70 @@
+body {
+  padding: 50px;
+  font: 20px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color:#222;
+  color:#ddd;
+}
+
+a {
+  color: #00B7FF;
+}
+
+#chart {
+  max-width: 600px;
+  max-height: 400px;
+}
+
+#code {
+	width: 100%;
+}
+
+#voteForA {
+	padding: 50px;
+	border: 3px outset;
+	background-color: #00B7FF;
+	color: #000;
+	float:left;
+	margin-right: 50px;
+	cursor: pointer;
+}
+
+#voteForB {
+	padding: 50px;
+	border: 3px outset;
+	background-color: #ff0000;
+	color: #000;
+	float:left;
+	cursor: pointer;
+}
+
+#undecided {
+	padding: 50px;
+	border: 3px outset;
+	background-color: #666;	
+	color: #000;
+	float:left;
+	margin-right: 50px;
+	cursor: pointer;
+}
+
+.button-disabled {
+	opacity: 0.1;
+}
+
+.button-enabled {
+	opacity: 1;
+}
+
+.hidden {
+	display:none;
+}
+
+#startDebate {
+	border: 3px outset;
+	padding: 20px;
+	margin: 20px;
+	text-align: center;
+	font-weight:bold;
+	background-color: #006600;
+	width: 200px;	
+}
