@@ -237,7 +237,8 @@ document.addEventListener("DOMContentLoaded", function() {
 	d3.select(window).on('resize', resize);
 
 	// Create WebSocket connection.
-	const socket = new WebSocket('ws://'+location.host);
+	const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+	const socket = new WebSocket(protocol+'//'+location.host);
 
 	window['debugSocket'] = socket;
 
