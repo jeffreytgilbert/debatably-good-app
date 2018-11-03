@@ -4,8 +4,7 @@ const codeGenerator = require('./generate-random-code');
 
 const makeParticipant = function (name) {
 	return {
-		name: name,
-		speaking: false
+		name: name
 	};
 }
 /**
@@ -45,7 +44,7 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 	// participants should be created on construction, but immutable for the duration of the debate
 	let participantA = makeParticipant(nameA);
 	let participantB = makeParticipant(nameB);
-	let undecided = 'Undecided';
+	let undecided = makeParticipant('Undecided');
 	__.undecided = undecided;
 	
 	let allowedDuration = duration || 10*60*1000;
@@ -80,43 +79,53 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 			let totals = {};
 			totals[participantA.name] = 0;
 			totals[participantB.name] = 0;
-			totals[undecided] = 0;
+			totals[undecided.name] = 0;
 
-			votes.forEach((v, i, arr) => {
+			votes.forEach((vote, i, arr) => {
+				console.log('calculateVotes', vote, i, arr);
 				const endTime = typeof arr[i+1] !== 'undefined' ? arr[i+1].time : Date.now();
-				totals[v.name] = endTime - v.time;
+				console.log(vote.time, endTime, Date.now());
+				console.log(arr[i+1]);
+				totals[vote.opinion] = endTime - vote.time;
 			});
+
+			console.log(totals);
 
 			return totals;
 		};
 
 		___.placeVote = function (participant) {
-
-			if (votes.length > 0 && participant === votes[votes.length-1].vote.name) {
+			console.log('placeVote', participant);
+			if (votes.length > 0 && participant === votes[votes.length-1].opinion) {
+				console.log('voted for the same person');
 				return false; // don't record spam
 			}
 
+			// This makes sure the debate is locked to ONLY when the debate is running.
 			if (__.started && !__.completed) {
 				switch (participant) {
 					case participantA.name:
 						votes.push({ 
 							time: Date.now(), 
-							vote: participantA
+							opinion: participantA.name
 						});
 						break;
 					case participantB.name:
 						votes.push({ 
 							time: Date.now(), 
-							vote: participantB
+							opinion: participantB.name
 						});
 						break;
 					default:
 						votes.push({ 
 							time: Date.now(), 
-							vote: undecided
+							opinion: undecided.name
 						});
 						break;
 				}
+
+				console.log('All votes: ', participant, votes.length);
+
 				return true;
 			} else {
 				return false;
@@ -136,17 +145,20 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 				total: 0
 			},
 			undecided: {
-				label: undecided,
+				label: undecided.name,
 				total: 0
 			}
 		};
 
 		audience.forEach(voter => {
 			const voterTotals = voter.calculateVotes();
+			console.log('voterTotals', voterTotals);
 			debateTotals.participantA.total += voterTotals[participantA.name];
 			debateTotals.participantB.total += voterTotals[participantB.name];
-			debateTotals.undecided.total += voterTotals[undecided];
+			debateTotals.undecided.total += voterTotals[undecided.name];
 		});
+
+		console.log(debateTotals);
 
 		return debateTotals;
 	};
@@ -156,13 +168,15 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 		if (timeoutInstance) {
 			clearTimeout(timeoutInstance);
 		}
-		__.completed = true;
 
 		// insert a final vote for nobody so we can measure 0ish time for that last point 
 		// without complex case logic
+		// can only do this BEFORE started has been marked "true".
 		audience.forEach(voter => {
 			voter.placeVote();
 		});
+
+		__.completed = true;
 
 		console.log('the debate has ended');
 		cb();
@@ -172,7 +186,8 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 		startTime = Date.now();
 		__.started = true;
 
-		// loop through all the voters and start them out with a vote of undecided
+		// loop through all the voters and start them out with a vote of undecided.
+		// can only do this AFTER started has been marked "true".
 		audience.forEach(voter => {
 			voter.placeVote();
 		});

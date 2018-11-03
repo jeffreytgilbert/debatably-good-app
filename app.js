@@ -191,12 +191,13 @@ setInterval(() => {
 wss.on('connection', (ws, req) => {
 	console.log('got a connection');
 
-	const debate = asm.get(req.session.sessionCode);
+	const session = req.session;
+	const debate = asm.get(session.sessionCode);
 
 	const user = new ConnectedUser(
-		!!(req.session.voterId),
-		!!(req.session.moderatorId),
-		req.session.userId,
+		!!(session.voterId),
+		!!(session.moderatorId),
+		session.userId,
 		debate
 	);
 
