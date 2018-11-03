@@ -21,6 +21,8 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 
 	const __ = this;
 
+	console.log('sessionCode, topic, nameA, nameB, duration, moderatorId', sessionCode, topic, nameA, nameB, duration, moderatorId);
+
 	// sessionCode never changes
 	// nameA never changes
 	// nameB never changes
@@ -52,6 +54,12 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 	__.completed = false;
 	let timeoutInstance;
 
+	__.getTimeRemaining = function () {
+		return (startTime === 0) ? 
+			allowedDuration :
+			(startTime + allowedDuration) - Date.now();
+	};
+
 	__.getModeratorId = function () {
 		return moderatorId;
 	};
@@ -71,15 +79,13 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 		___.calculateVotes = function () {
 			let totals = {};
 			totals[participantA.name] = 0;
-			totals[participantA.name] = 0;
+			totals[participantB.name] = 0;
 			totals[undecided] = 0;
 
-			if (__.completed || __.started) {
-				votes.forEach((v, i, arr) => {
-					const endTime = arr[i+1] ? arr[i+1].time : allowedDuration;
-					totals[v.name] = endTime - v.time;
-				});
-			}
+			votes.forEach((v, i, arr) => {
+				const endTime = typeof arr[i+1] !== 'undefined' ? arr[i+1].time : Date.now();
+				totals[v.name] = endTime - v.time;
+			});
 
 			return totals;
 		};
@@ -138,7 +144,7 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 		audience.forEach(voter => {
 			const voterTotals = voter.calculateVotes();
 			debateTotals.participantA.total += voterTotals[participantA.name];
-			debateTotals.participantA.total += voterTotals[participantB.name];
+			debateTotals.participantB.total += voterTotals[participantB.name];
 			debateTotals.undecided.total += voterTotals[undecided];
 		});
 
@@ -147,8 +153,17 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 
 	// Maybe this shouldn't be world accessable, but maybe you want to kill it early?
 	__.endDebate = function (cb) {
-		if (timeoutInstance) { clearTimeout(timeoutInstance); }
+		if (timeoutInstance) {
+			clearTimeout(timeoutInstance);
+		}
 		__.completed = true;
+
+		// insert a final vote for nobody so we can measure 0ish time for that last point 
+		// without complex case logic
+		audience.forEach(voter => {
+			voter.placeVote();
+		});
+
 		console.log('the debate has ended');
 		cb();
 	};

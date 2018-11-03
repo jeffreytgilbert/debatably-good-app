@@ -164,7 +164,7 @@ function realTimeLineChart() {
 	};
 	
 	return chart;
-	}
+}
 
 
 
@@ -198,7 +198,6 @@ function realTimeLineChart() {
 
 
 
-console.log('we in this piece');
 var lineArr = [];
 var MAX_LENGTH = 100;
 var duration = 500;
@@ -226,6 +225,19 @@ function resize() {
 	d3.select("#chart").call(chart);
 }
 
+
+
+
+
+
+
+var errorHandler = function () {
+	$('#page').hide().after(
+		'<h1>Your connection to the debate server has been lost. '+
+		'Please refresh page.</h1>'
+	);
+};
+
 document.addEventListener("DOMContentLoaded", function() {
 	updateData({
 		time: Date.now(),
@@ -244,24 +256,52 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	// Listen for messages
 	socket.addEventListener('message', (msgEvt) => {
+
 		console.log('got a message');
+
 		if (msgEvt.data) {
+
 			var event = JSON.parse(msgEvt.data);
+
 			console.log(event);
+
 			switch (event.type) {
 				case 'moderator-update':
-					console.log('updating moderator stuff');
-					const chartData = event.data.chartData;
-					const audience = event.data.audience;
-					$('#audience ul').html('<li>' + audience.join('</li><li>') + '</li>');
-					// expected line data format:
-					// var lineData = { time: time, participantA: 1-10, participantB: 1-10, undecided: 1-10 };
-					updateData({
-						time: chartData.time,
-						x: chartData.participantA.total,
-						y: chartData.participantB.total,
-						z: chartData.undecided.total
-					});
+					console.log('updating moderator');
+
+					// expected format is {started:bool, completed:bool, timeRemaining:ms}
+					var debateDetails = event.data.debateDetails;
+					if (debateDetails.completed) {
+						var button = $('#startDebate:visible');
+						if (button) {
+							button.hide().after(
+								'<h1>The debate is over!</h1>'
+							);
+						}
+					} else if (!debateDetails.started) {
+
+						var audience = event.data.audience;
+						$('#audience ul').html('<li>' + audience.join('</li><li>') + '</li>');
+	
+					} else {
+						var chartData = event.data.chartData;
+						// expected line data format:
+						// var lineData = { time: time, participantA: 1-10, participantB: 1-10, undecided: 1-10 };
+						updateData({
+							time: chartData.time,
+							x: chartData.participantA.total,
+							y: chartData.participantB.total,
+							z: chartData.undecided.total
+						});
+					}
+
+					var secondsRemaining = Math.round(debateDetails.timeRemaining/1000);
+					if (secondsRemaining < 0) {
+						$('#timeRemaining').text('Done! Fin!');
+					} else {
+						$('#timeRemaining').text(secondsRemaining + ' seconds remaining.');
+					}
+
 					break;
 				default:
 					console.log('Unknown event received', msgEvt);
@@ -269,6 +309,16 @@ document.addEventListener("DOMContentLoaded", function() {
 			}
 		}
 		console.log('Message from server ', event.data);
+	});
+
+	socket.addEventListener('close', (evt) => {
+		console.log('Session closed', evt);
+		errorHandler();
+	});
+
+	socket.addEventListener('error', (errEvt) => {
+		console.log('error', errEvt);
+		errorHandler();
 	});
 
 	$('#startDebate').on('click', () => {

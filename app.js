@@ -54,12 +54,6 @@ const wss = new SocketServer({
 	server
 });
 
-// import route definitions
-const indexRouter = require('./routes/index');
-const sessionRouter = require('./routes/session');
-const liveSessionRouter = require('./routes/live-session');
-const joinSessionRouter = require('./routes/join-session');
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -73,10 +67,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// import route definitions
+const addRouter = (app, name) => {
+	const router = require('./routes/' + name);
+	app.use('/' + name, router);
+};
+
+const indexRouter = require('./routes/index');
 app.use('/', indexRouter);
-app.use('/session', sessionRouter);
-app.use('/live-session', liveSessionRouter);
-app.use('/join-session', joinSessionRouter);
+
+addRouter(app, 'create-debate');
+addRouter(app, 'moderate-debate');
+addRouter(app, 'vote-on-debate');
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -112,6 +114,16 @@ const ConnectedUser = function (isVoter, isModerator, userId, debate) {
 	this.debate = debate;
 };
 
+/**
+ * @param {WebSocket} offendingWs 
+ */
+const removeBadConnections = (offendingWs) => {
+	socketConnections.forEach((sessionToSocketMap, index) => {
+		if(sessionToSocketMap.ws === offendingWs) {
+			delete socketConnections[index];
+		}
+	});
+};
 
 
 /**
@@ -120,20 +132,20 @@ const ConnectedUser = function (isVoter, isModerator, userId, debate) {
 const updateSessions = () => {
 	const runningSessions = asm.getRunningSessions();
 	
-//	console.log('these sessions might be running', JSON.stringify(runningSessions));
-
 	runningSessions.forEach(debate => {
-		console.log('Found a debate to update');
 		socketConnections.forEach(connectedUser => {
-			console.log('Found a user who might be a moderator');
 			if (connectedUser.user.isModerator && debate.getModeratorId() === connectedUser.user.userId) {
-				console.log('user is a moderator');
 				if (connectedUser.ws.readyState === WebSocket.OPEN) {
-					console.log('moderator still has an open connection');
+					console.log('updating ', debate.sessionCode, 'for', debate.getModeratorId());
 					const message = JSON.stringify({
 						type: 'moderator-update', 
 						data: { 
 							chartData: debate.calculateDebateResults(),
+							debateDetails: {
+								started: debate.started,
+								completed: debate.completed,
+								timeRemaining: debate.getTimeRemaining()
+							},
 							audience: debate.getAudience().length > 0 ? debate.getAudience() : ['nobody yet']
 						}
 					});
@@ -167,12 +179,15 @@ const endDebate = (debate) => {
 setInterval(() => {
 	//	console.log('update sessions', Date.now());
 		updateSessions();
-	}, 1000
+	}, 2000
 );
 
 /**
  *  MANAGE ALL INBOUND COMMUNICATION
  * */ 
+
+// on connection is different than on open in that you get request info 
+// you can use to parse things like session cookies and such, which we do and store.
 wss.on('connection', (ws, req) => {
 	console.log('got a connection');
 
@@ -239,6 +254,16 @@ wss.on('connection', (ws, req) => {
 					break;
 			}
 		}
+	});
+
+	ws.on('close', (code, reason) => {
+		console.log('Session closed', code, reason);
+		removeBadConnections(ws);
+	});
+
+	ws.on('error', (error) => {
+		console.log('error', error);
+		removeBadConnections(ws);
 	});
 
 });

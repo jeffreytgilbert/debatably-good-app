@@ -3,16 +3,16 @@ extends layout
 block content
   #content
     h1 This is #{title} 
-    form(action="/session", method="post")
+    form(action="/create-debate", method="post")
       p 
       input(type="text", placeholder="What would you like to debate?", name="topic")
       p 
-        input(type="text", placeholder="Participant A's name", name="participantA")
+        input(type="text", placeholder="Opinion A", name="participantA")
       p
-        input(type="text", placeholder="Participant B's name", name="participantB")
+        input(type="text", placeholder="Opinion B", name="participantB")
       p Duration in Minutes
       input(type="number", name="duration", value="10")
       p
         input(type="submit", value="Create Debate Session")
 
-  script(src="/javascripts/session.js")
+  script(src="/javascripts/create-debate.js")

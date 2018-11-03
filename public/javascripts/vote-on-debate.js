@@ -1,4 +1,12 @@
 
+
+var errorHandler = function () {
+	$('#page').hide().after(
+		'<h1>Your connection to the debate server has been lost. '+
+		'Please refresh page.</h1>'
+	);
+};
+
 document.addEventListener("DOMContentLoaded", function() {
 
 	// Create WebSocket connection.
@@ -7,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	window['debugSocket'] = socket;
 
-	var bindHandlers = function (){
+	var bindHandlers = function () {
 		// TODO add styles for enabled and stuff
 		$('#voteForA').on('click',(evt) => {
 			console.log('Got a click on participant A', $(this).text());
@@ -92,7 +100,18 @@ document.addEventListener("DOMContentLoaded", function() {
 		console.log('Message from server ', event.data);
 	});
 
-	socket.addEventListener('open', () => {
+	socket.addEventListener('close', (evt) => {
+		console.log('Session closed', evt);
+		errorHandler();
+	});
+
+	socket.addEventListener('error', (errEvt) => {
+		console.log('error', errEvt);
+		errorHandler();
+	});
+
+	socket.addEventListener('open', (evt) => {
+		console.log('open', evt);
 		requestInitialStatus();
 	});
 });

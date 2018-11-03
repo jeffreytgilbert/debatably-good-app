@@ -1,0 +1,21 @@
+extends layout
+
+block content
+
+  #page
+    #sessionIsPending.hidden
+      h1 The debate will begin shortly. Thanks for your patience.
+
+    #sessionIsLive.hidden
+
+      h1 #{title} 
+
+      #code
+        #voteForA.disabled #{participantA}
+        #undecided.disabled #{undecided}
+        #voteForB.disabled #{participantB}
+
+    #sessionOver.hidden
+      h1 The debate is over. Thanks for voting!
+
+  script(src="/javascripts/vote-on-debate.js")

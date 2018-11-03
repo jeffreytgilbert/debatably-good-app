@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
 		console.log('Updating session for user', uuid);
 		req.session.userId = uuid;
 	}
-	res.render('session', {
+	res.render('create-debate', {
 		title: 'Debatably Good'
 	});
 });
@@ -23,6 +23,8 @@ router.post('/', function(req, res, next) {
 			req.body.participantB && 
 			req.body.duration
 		) {
+			console.log(req.body.topic, req.body.participantA, req.body.participantB, req.body.duration);
+
 			const generateRandomCode = require('../app/generate-random-code.js');
 			const sessionCode = generateRandomCode(4).toUpperCase();
 
@@ -33,16 +35,16 @@ router.post('/', function(req, res, next) {
 				req.body.topic,
 				req.body.participantA,
 				req.body.participantB,
-				(+req.body.duration * 60 * 1000),
+				(parseInt(req.body.duration, 10) * 60 * 1000), // 1000 ms + 60 seconds in a min
 				req.session.userId
 			);
 	
-			res.redirect(302, '/live-session?code='+sessionCode);
+			res.redirect(302, '/moderate-debate?code=' + sessionCode);
 		} else {
-			res.redirect(302, '/session?issue=missing-info')
+			res.redirect(302, '/create-debate?issue=missing-info')
 		}
 	} else {
-		res.redirect(302, '/session?issue=missing-session')
+		res.redirect(302, '/create-debate?issue=missing-session')
 	}
 
 });
