@@ -134,7 +134,7 @@ const updateSessions = () => {
 		socketConnections.forEach(connectedUser => {
 			if (connectedUser.user.isModerator && debate.getModeratorId() === connectedUser.user.userId) {
 				if (connectedUser.ws.readyState === WebSocket.OPEN) {
-					console.log('updating', debate.sessionCode, 'for', debate.getModeratorId());
+					// console.log('updating', debate.sessionCode, 'for', debate.getModeratorId());
 					const message = JSON.stringify({
 						type: 'moderator-update', 
 						data: { 
@@ -206,7 +206,7 @@ const socketRequestHandler = (ws, session, debate) => {
 
 		const event = JSON.parse(data.toString());
 
-		console.log('event received as', event);
+		console.log('event received as', event, 'as', user);
 
 		if (user.isModerator) {
 			switch (event.type) {
