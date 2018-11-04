@@ -10,9 +10,11 @@ a {
 }
 
 #chart {
-  max-width: 600px;
-  max-height: 400px;
+  min-width: 85%;
+  height: 600px;
 }
+
+#chart a-scene { display: block; width: 85%; height: 600px }
 
 #code {
 	width: 100%;
