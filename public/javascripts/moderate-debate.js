@@ -6,23 +6,23 @@ var errorHandler = function () {
 	);
 };
 
-let onVote;
+var onVote;
 
 var doChartStuff = function () {
-	let aBar = document.querySelector('#aBar');
-	let bBar = document.querySelector('#bBar');
-	let connected = document.querySelector('#connected');
+	var aBar = document.querySelector('#aBar');
+	var bBar = document.querySelector('#bBar');
+	var connected = document.querySelector('#connected');
 	//Hide connected text
 	connected.setAttribute('scale','0 0 0');
 	
-	let total = 0.001; //protect from div/0
-	let aVote = 0.0;
-	let bVote = 0.0;
+	var total = 0.001; //protect from div/0
+	var aVote = 0.0;
+	var bVote = 0.0;
 	
-	let scalar = 1;
-	let easing = 0.85;
+	var scalar = 1;
+	var easing = 0.85;
 	
-	let reset = () => {
+	var reset = () => {
 	  total = 0.001; //protect from div/0
 	  aVote = 0.0;
 	  bVote = 0.0;
@@ -34,18 +34,18 @@ var doChartStuff = function () {
 	  total = voteA + voteB;
 	};
 	
-	let scaleBars = (bar, votes) => {
-		let curScale = bar.getAttribute('scale');
-		let curPos = bar.getAttribute('position');
-		let mag = Math.sqrt(votes*votes + total*total);
-		let targetY = (Math.sqrt(votes*votes) / mag  * scalar) * easing;
+	var scaleBars = (bar, votes) => {
+		var curScale = bar.getAttribute('scale');
+		var curPos = bar.getAttribute('position');
+		var mag = Math.sqrt(votes*votes + total*total);
+		var targetY = (Math.sqrt(votes*votes) / mag  * scalar) * easing;
 		curScale.y = (curScale.y + targetY)* easing;
 		curPos.y = curScale.y * .5;
 		bar.setAttribute('scale', curScale);
 		bar.setAttribute('position', curPos);
 	};
 	
-	let renderLoop = () => {
+	var renderLoop = () => {
 		scaleBars(aBar, aVote);
 		scaleBars(bBar, bVote);
 		requestAnimationFrame(renderLoop);
@@ -74,8 +74,8 @@ document.addEventListener("DOMContentLoaded", function() {
 	doChartStuff();
 	
 	// Create WebSocket connection.
-	const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-	const socket = new WebSocket(protocol+'//'+location.host);
+	var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+	var socket = new WebSocket(protocol+'//'+location.host);
 
 	window['debugSocket'] = socket;
 
