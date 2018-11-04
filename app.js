@@ -140,6 +140,8 @@ const updateSessions = () => {
 						data: { 
 							chartData: debate.calculateDebateResults(),
 							debateDetails: {
+								allowedDuration: debate.allowedDuration,
+								startTime: debate.startTime,
 								started: debate.started,
 								completed: debate.completed,
 								timeRemaining: debate.getTimeRemaining()
@@ -206,7 +208,15 @@ const socketRequestHandler = (ws, session, debate) => {
 
 		const event = JSON.parse(data.toString());
 
-		console.log('event received as', event, 'as', user);
+		console.log('event received as:', event, 
+			',as moderator:', user.isModerator, 
+			',as voter:', user.isVoter,
+			',as session:', user.userId,
+			',for debate:', user.debate.sessionCode, 
+			',starting:', user.debate.startTime, 
+			',for this long:', user.debate.allowedDuration, 
+			',as started:', user.debate.started, 
+			',as completed:', user.debate.completed);
 
 		if (user.isModerator) {
 			switch (event.type) {

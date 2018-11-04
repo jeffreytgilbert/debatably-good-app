@@ -45,16 +45,16 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 	let undecided = makeParticipant('Undecided');
 	__.undecided = undecided;
 	
-	let allowedDuration = duration || 10*60*1000;
-	let startTime = 0;
+	__.allowedDuration = duration || 10*60*1000;
+	__.startTime = 0;
 	__.started = false;
 	__.completed = false;
 	let timeoutInstance;
 
 	__.getTimeRemaining = function () {
-		return (startTime === 0) ? 
-			allowedDuration :
-			(startTime + allowedDuration) - Date.now();
+		return (__.startTime === 0) ? 
+			__.allowedDuration :
+			(__.startTime + __.allowedDuration) - Date.now();
 	};
 
 	__.getModeratorId = function () {
@@ -173,7 +173,7 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 	};
 
 	__.startDebate = function (cb) {
-		startTime = Date.now();
+		__.startTime = Date.now();
 		__.started = true;
 
 		// loop through all the voters and start them out with a vote of undecided.
@@ -184,13 +184,13 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 
 		timeoutInstance = setTimeout(function() {
 			__.endDebate(cb);
-		}, allowedDuration);
+		}, __.allowedDuration);
 
 		console.log('the debate has started');
 	};
 
 	__.getState = function () {
-		console.log('There is ' + ((startTime + allowedDuration) - Date.now()) + ' ms left of ' + allowedDuration + ' ms in the debate');
+		console.log('There is ' + ((__.startTime + __.allowedDuration) - Date.now()) + ' ms left of ' + __.allowedDuration + ' ms in the debate');
 		return __.state;
 	};
 
