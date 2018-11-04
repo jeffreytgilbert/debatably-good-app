@@ -15,9 +15,10 @@ var doChartStuff = function () {
 	//Hide connected text
 	connected.setAttribute('scale','0 0 0');
 	
-	var total = 0.001; //protect from div/0
-	var aVote = 0.0;
-	var bVote = 0.0;
+	let total = 0.001; //protect from div/0
+	let aVote = 0.0;
+	let bVote = 0.0;
+	let cVote = 0.0;
 	
 	var scalar = 1;
 	var easing = 0.85;
@@ -28,10 +29,13 @@ var doChartStuff = function () {
 	  bVote = 0.0;
 	};
 	
-	onVote = (voteA, voteB) => {
+	onVote = (voteA, voteB, voteC) => {
 	  aVote = parseFloat(voteA);
 	  bVote = parseFloat(voteB);
-	  total = voteA + voteB;
+	  cVote = parseFloat(voteC);
+	  total = aVote + bVote + cVote;
+	//   renderLoop();
+	  console.log(aVote, bVote, cVote, total)
 	};
 	
 	var scaleBars = (bar, votes) => {
@@ -121,7 +125,8 @@ document.addEventListener("DOMContentLoaded", function() {
 						// var lineData = { time: time, participantA: 1-10, participantB: 1-10, undecided: 1-10 };
 						onVote(
 							chartData.participantA.total,
-							chartData.participantB.total
+							chartData.participantB.total,
+							chartData.undecided.total
 						);
 					}
 
