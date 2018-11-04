@@ -81,7 +81,7 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 
 			votes.forEach((vote, i, arr) => {
 				const endTime = typeof arr[i+1] !== 'undefined' ? arr[i+1].time : Date.now();
-				totals[vote.opinion] = endTime - vote.time;
+				totals[vote.opinion] += endTime - vote.time;
 			});
 
 			return totals;

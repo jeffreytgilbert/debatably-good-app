@@ -69,8 +69,8 @@ document.addEventListener("DOMContentLoaded", function() {
 			'<a-box id="bBar" position="1 0.125 -3" rotation="0 0 0" scale="1 .25 1" color="#FFC65D"></a-box>'+
 			'<a-plane position="0 0 -4" rotation="-90 0 0" width="10" height="4" color="#515151" shadow></a-plane>'+
 			'<a-text id="connected" value="Connected" color="#BBB" position="3 0.25 -2" scale=".5 .5 .5"></a-text>'+
-			'<a-text id="player1" value="P1" color="#BBB" position="-1 0.25 -2" scale="1 1 1"></a-text>'+
-			'<a-text id="player2" value="P2" color="#BBB" position=".65 0.25 -2" scale="1 1 1"></a-text>'+
+			'<a-text id="player1" value="'+$('#opinionA').text()+'" color="#BBB" position="-1 0.25 -2" scale="1 1 1"></a-text>'+
+			'<a-text id="player2" value="'+$('#opinionB').text()+'" color="#BBB" position=".65 0.25 -2" scale="1 1 1"></a-text>'+
 		'</a-scene>'
 	);
 

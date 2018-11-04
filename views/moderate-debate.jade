@@ -15,10 +15,11 @@ block content
       h1 #{title} 
 
     #code
-      p Opinions
+      p Opinion Poll
       ul
-        li= participantA
-        li= participantB
+        li#opinionA #{participantA}
+        li#opinionB #{participantB}
+        li#theUndecided #{undecided}
 
     #startDebate Start Debating
 
@@ -26,5 +27,4 @@ block content
 
     #chart
 
-  script(src="https://aframe.io/releases/0.8.2/aframe.min.js")
   script(src="/javascripts/moderate-debate.js")

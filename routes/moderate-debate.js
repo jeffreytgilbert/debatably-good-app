@@ -19,6 +19,7 @@ router.get('/', function(req, res, next) {
 						audienceCode: debate.sessionCode,
 						participantA: debate.getParticipants()[0],
 						participantB: debate.getParticipants()[1],
+						undecided: debate.undecided.name,
 						audience: debate.getAudience() && debate.getAudience().length ? 
 							debate.getAudience() : 
 							['nobody yet']
