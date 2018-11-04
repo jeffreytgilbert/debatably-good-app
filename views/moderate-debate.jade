@@ -1,30 +1,39 @@
 extends layout
 
 block content
-  #page
-    #audience
-      p Join the fun at 
-        span#joinLocation ... 
-        span and enter code 
-          span#audienceCode #{audienceCode}
-      ul
-        each user in audience
-          li= user
+	#page.container
+		.row
+			.eight.columns
+				//- Join header
+				span Join the fun at 
+				u#joinLocation ...
+				span and enter code 
+				span#audienceCode #{audienceCode}
+			.four.columns(style='text-align:right')
+				button#startDebate.button-primary Start Debating
+				#timeRemaining.hidden= allowedDuration
+		hr
+		//- Page contents
+		.row
+			.twelve.columns 
+				h3(style='text-align:center') #{title} 
+		.row
+			.five.columns(style='text-align:right')
+				h5#opinionA #{participantA}
+			.one.columns(style='text-align:center')
+				h5 vs
+			.five.columns
+				h5#opinionB #{participantB}
+		.row.hidden
+			#theUndecided #{undecided}
+		hr
+		//- Game
+		.row
+			.ten.columns
+				#chart
+			.two.columns
+				ul#audience.pull-left
+					each user in audience
+						li.pull-left= user
 
-    #content
-      h1 #{title} 
-
-    #code
-      p Opinion Poll
-      ul
-        li#opinionA #{participantA}
-        li#opinionB #{participantB}
-        li#theUndecided #{undecided}
-
-    #startDebate Start Debating
-
-    #timeRemaining= allowedDuration
-
-    #chart
-
-  script(src="/javascripts/moderate-debate.js")
+	script(src="/javascripts/moderate-debate.js")

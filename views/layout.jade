@@ -1,9 +1,24 @@
 doctype html
 html
-  head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
-    script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js")
-    script(src="https://aframe.io/releases/0.8.2/aframe.min.js")
-  body
-    block content
+	head
+		title= title
+
+		//- Mobile Specific Metas
+		meta(name='viewport', content='width=device-width, initial-scale=1')
+
+		//- FONTS
+		link(rel='stylesheet', type='text/css', href='//fonts.googleapis.com/css?family=Raleway:400,300,600')
+
+		//- CSS
+		link(rel='stylesheet', href='/stylesheets/normalize.css')
+		link(rel='stylesheet', href='/stylesheets/skeleton.css')
+		link(rel='stylesheet', href='/stylesheets/style.css')
+
+		//- Favicon
+		link(rel='icon', type='image/png', href='images/favicon.png')
+
+		script(src='//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js')
+		script(src='//aframe.io/releases/0.8.2/aframe.min.js')
+
+	body
+		block content

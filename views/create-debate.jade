@@ -1,18 +1,49 @@
 extends layout
 
 block content
-  #content
-    h1 This is #{title} 
-    form(action="/create-debate", method="post")
-      p 
-      input(type="text", placeholder="What would you like to debate?", name="topic")
-      p 
-        input(type="text", placeholder="Opinion A", name="participantA")
-      p
-        input(type="text", placeholder="Opinion B", name="participantB")
-      p Duration in Minutes
-      input(type="number", name="duration", value="10")
-      p
-        input(type="submit", value="Create Debate Session")
+	#content.container(style='text-align:center')
+		form(action='/create-debate', method='post')
+			.row
+				h1.twelve.columns What are we talking about?
 
-  script(src="/javascripts/create-debate.js")
+			.row
+				.twelve.columns
+					input.u-full-width(type='text', placeholder='Topic', name='topic')
+
+			.row
+				.five.columns
+					input.u-full-width(type='text', placeholder='Opinion A', name='participantA')
+				.two.columns 
+					h4 vs
+				.five.columns
+					input.u-full-width(type='text', placeholder='Opinion B', name='participantB')
+
+			.row
+				span -
+
+			.row
+				.five.columns
+					span(style='visibility:hidden') -
+				.one.columns
+					select(name='duration', style='color:#000')
+						option(value='2') 2
+						option(value='3') 3
+						option(value='4') 4
+						option(value='6') 6
+						option(value='8') 8
+						option(value='10') 10
+						option(value='12') 12
+						option(value='15') 15
+						option(value='20') 20
+				.four.columns 
+					h4(style='text-align:left') Minutes
+				.two.columns 
+					span(style='visibility:hidden') -
+
+			hr
+
+			.row
+				div.twelve.columns
+					input.button-primary(type='submit', value='Create Debate Session')
+
+	script(src='/javascripts/create-debate.js')

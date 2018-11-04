@@ -1,13 +1,13 @@
 extends layout
 
 block content
-  h1= title
-  form(action="/vote-on-debate", method="get") 
-    p
-      input(type="text", placeholder="What's the room code?", name="sessionCode")
-    p
-      input(type="text", placeholder="What's your name?" name="name")
-    p
-      input(type="submit", value="Join")
+	form(action='/vote-on-debate', method='get') 
+		h3 Room code
+		input(type='text', name='sessionCode', autocomplete='off')
+		h3 Name
+		input(type='text', name='name')
+		hr
+		p
+			input.button-primary(type='submit', value='Join')
 
-script(src="/javascripts/index.js")
+script(src='/javascripts/index.js')
