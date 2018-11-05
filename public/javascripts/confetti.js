@@ -3,6 +3,11 @@ var $ = window.$;
 function youWon () {
 	console.log('someone won!');
 
+	$(document.body).css({
+		margin: 0,
+		overflow: 'hidden'
+	});
+
 	for (var i = 0; i < 250; i++) {
 		create(i);
 	}

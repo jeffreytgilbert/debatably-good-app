@@ -39,11 +39,6 @@ input, select {
 
 
 
-
-body {
-	margin: 0;
-	overflow: hidden;
-  }
   
   .wrapper {
 	position: relative;
