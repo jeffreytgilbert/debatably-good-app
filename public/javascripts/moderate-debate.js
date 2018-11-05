@@ -2,7 +2,7 @@
 var errorHandler = function () {
 	$('#page').hide().after(
 		'<h1>Your connection to the debate server has been lost. '+
-		'Please refresh page.</h1>'
+		'Please refresh the page.</h1>'
 	);
 };
 

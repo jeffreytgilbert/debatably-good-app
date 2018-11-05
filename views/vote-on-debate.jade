@@ -3,19 +3,22 @@ extends layout
 block content
 
 	#page
-		#sessionIsPending.hidden
-			h1 The debate will begin shortly. Thanks for your patience.
+		h3#sessionIsPending.hidden 
+			span The debate will begin shortly. 
+			br
+			span Thanks for your patience.
+		h3#sessionOver.hidden 
+			span The debate is over. 
+			br
+			span Thanks for voting!
 
 		#sessionIsLive.hidden
-
-			h1 #{title} 
-
-			#code
-				#voteForA.disabled #{participantA}
-				#undecided.disabled #{undecided}
-				#voteForB.disabled #{participantB}
-
-		#sessionOver.hidden
-			h1 The debate is over. Thanks for voting!
+			button#voteForA.u-full-width.game-button #{participantA}
+			br
+			br
+			button#undecided.u-full-width.game-button #{undecided}
+			br
+			br
+			button#voteForB.u-full-width.game-button #{participantB}
 
 	script(src="/javascripts/vote-on-debate.js")

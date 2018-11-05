@@ -4,8 +4,8 @@ body {
   color:#ddd;
 }
 
-a {
-  color: #00B7FF;
+input, select {
+	color:#000;
 }
 
 #chart {
@@ -13,53 +13,19 @@ a {
   height: 600px;
 }
 
-#chart a-scene { display: block; width: 85%; height: 600px }
-
-#code {
-	width: 100%;
-}
+#chart a-scene { display: block; width: 100%; height: 600px }
 
 #currentVote {
 	padding: 50px;
 	margin: 5% 10% 5% 10%;
 }
 
-#voteForA {
-	padding: 50px;
-	border: 3px outset;
-	background-color: #00B7FF;
-	color: #000;
-	margin: 5% 10% 5% 10%;
-	cursor: pointer;
-}
-
-#voteForB {
-	padding: 50px;
-	border: 3px outset;
-	background-color: #ff0000;
-	color: #000;
-	margin: 5% 10% 5% 10%;
-	cursor: pointer;
-}
-
-#undecided {
-	padding: 50px;
-	border: 3px outset;
-	background-color: #666;	
-	color: #000;
-	margin: 5% 10% 5% 10%;
-	cursor: pointer;
-}
-
-.button-disabled {
-	opacity: 0.1;
-}
-
-.button-enabled {
-	opacity: 1;
-}
-
 .hidden {
 	display:none;
 }
 
+.game-button {
+	padding:2em;
+	font-size:2em;
+	line-height:0em;
+}

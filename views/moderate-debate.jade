@@ -2,14 +2,16 @@ extends layout
 
 block content
 	#page.container
+		//- Join header
 		.row
-			.eight.columns
-				//- Join header
-				span Join the fun at 
-				u#joinLocation ...
-				span and enter code 
-				span#audienceCode #{audienceCode}
-			.four.columns(style='text-align:right')
+			.six.columns
+				div
+					span Join the fun at 
+					u#joinLocation ...
+				div
+					span Enter code 
+					strong#audienceCode #{audienceCode}
+			.six.columns(style='text-align:right')
 				button#startDebate.button-primary Start Debating
 				#timeRemaining.hidden= allowedDuration
 		hr
@@ -20,7 +22,7 @@ block content
 		.row
 			.five.columns(style='text-align:right')
 				h5#opinionA #{participantA}
-			.one.columns(style='text-align:center')
+			.two.columns(style='text-align:center')
 				h5 vs
 			.five.columns
 				h5#opinionB #{participantB}
@@ -29,9 +31,9 @@ block content
 		hr
 		//- Game
 		.row
-			.ten.columns
+			.nine.columns
 				#chart
-			.two.columns
+			.three.columns
 				ul#audience.pull-left
 					each user in audience
 						li.pull-left= user

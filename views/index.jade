@@ -3,11 +3,13 @@ extends layout
 block content
 	form(action='/vote-on-debate', method='get') 
 		h3 Room code
-		input(type='text', name='sessionCode', autocomplete='off')
-		h3 Name
-		input(type='text', name='name')
-		hr
-		p
-			input.button-primary(type='submit', value='Join')
+		input.u-full-width(type='text', name='sessionCode', autocomplete='off', maxlength='4')
+		h3 Your name
+		input.u-full-width(type='text', name='name', maxlength='22')
+		br
+		br
+		br
+		br
+		input.button-primary.u-full-width(type='submit', value='Join Now')
 
 script(src='/javascripts/index.js')

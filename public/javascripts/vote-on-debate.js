@@ -1,104 +1,75 @@
+var $ = window.$;
 
+// TODO http://loov.io/jsfx/ <-- add this for randomness on the waiting screen
 
 var errorHandler = function () {
 	$('#page').hide().after(
-		'<h1>Your connection to the debate server has been lost. '+
-		'Please refresh page.</h1>'
+		'<h3>Your connection to the debate has been lost. <br>'+
+		'Please refresh page to continue.</h3>'
 	);
 };
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function() {
 
 	// Create WebSocket connection.
-	const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-	const socket = new WebSocket(protocol+'//'+location.host);
+	var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+	var socket = new WebSocket(protocol+'//'+location.host);
 
 	window['debugSocket'] = socket;
 
+	var A = $('#voteForA'),
+		B = $('#voteForB'),
+		C = $('#undecided');
+
+	var resetButtonStyles = function () {
+		A.removeClass('button-primary');
+		B.removeClass('button-primary');
+		C.removeClass('button-primary');
+	};
+
+	var handleClick = function (target) {
+		var participant = {
+			'type':'vote',
+			'data':{
+				'participant': target.text()
+			}
+		};
+
+		resetButtonStyles();
+		target.addClass('button-primary');
+		socket.send(JSON.stringify(participant));
+	};
+
 	var bindHandlers = function () {
-		// TODO add styles for enabled and stuff
-		$('#voteForA').on('click',(evt) => {
-			console.log('Got a click on participant A', $(this).text());
-			var participant = {
-				"type":"vote",
-				"data":{
-					"participant": $('#voteForA').text()
-				}
-			};
-			socket.send(JSON.stringify(participant));
-		});
-	
-		$('#voteForB').on('click',(evt) => {
-			console.log('Got a click on participant B', $(this).text());
-			var participant = {
-				"type":"vote",
-				"data":{
-					"participant": $('#voteForB').text()
-				}
-			};
-			socket.send(JSON.stringify(participant));
-		});
-	
-		$('#undecided').on('click',(evt) => {
-			console.log('Got a click on undecided', $(this).text());
-			var participant = {
-				"type":"vote",
-				"data":{
-					"participant": $('#undecided').text()
-				}
-			};
-			socket.send(JSON.stringify(participant));
-		});
+		A.on('click', evt => handleClick(A) );
+		B.on('click', evt => handleClick(B) );
+		C.on('click', evt => handleClick(C) );
 	};
 	
 	var unbindHandlers = function () {
-		// TODO add styles for disabled and stuff
-		$('#voteForA').unbind();
-		$('#voteForB').unbind();
-		$('#undecided').unbind();
+		A.unbind();
+		B.unbind();
+		C.unbind();
 	};
 	
 	var requestInitialStatus = function () {
 		var request = {
-			"type":"voter-check-in"
+			'type':'voter-check-in'
 		};
 		socket.send(JSON.stringify(request));
 	};
 
-	// Listen for messages
-	socket.addEventListener('message', (msgEvt) => {
-		console.log('got a message');
-		if (msgEvt.data) {
-			var event = JSON.parse(msgEvt.data);
-			console.log(event);
-			switch (event.type) {
-				case 'start':
-					console.log('updating user stuff to start/unlock');
-					bindHandlers();
-					$('#sessionIsPending').addClass('hidden');
-					$('#sessionIsLive').removeClass('hidden');
-					$('#sessionOver').addClass('hidden');
-					break;
-				case 'end':
-					console.log('updating user stuff to end/lock');
-					unbindHandlers();
-					$('#sessionIsPending').addClass('hidden');
-					$('#sessionIsLive').addClass('hidden');
-					$('#sessionOver').removeClass('hidden');
-					break;
-				case 'pending':
-					console.log('got pending as the status');
-					$('#sessionIsPending').removeClass('hidden');
-					$('#sessionIsLive').addClass('hidden');
-					$('#sessionOver').addClass('hidden');
-					break;
-				default:
-					console.log('Unknown event received', msgEvt);
-					break;
-			}
-		}
-		console.log('Message from server ', event.data);
-	});
+	var states = ['pending', 'live', 'over'];
+	var stateRefs = {
+		'pending': $('#sessionIsPending'),
+		'live': $('#sessionIsLive'),
+		'over': $('#sessionOver')
+	};
+
+	var toggleState = function (state) {
+		states.forEach( state => stateRefs[state].hide() );
+		stateRefs[state].show();
+	};
 
 	socket.addEventListener('close', (evt) => {
 		console.log('Session closed', evt);
@@ -114,4 +85,29 @@ document.addEventListener("DOMContentLoaded", function() {
 		console.log('open', evt);
 		requestInitialStatus();
 	});
+
+	// Listen for messages
+	socket.addEventListener('message', (msgEvt) => {
+		if (msgEvt.data) {
+			var event = JSON.parse(msgEvt.data);
+
+			switch (event.type) {
+				case 'start':
+					toggleState('live');
+					bindHandlers();
+					break;
+				case 'end':
+					toggleState('over');
+					unbindHandlers();
+					break;
+				case 'pending':
+					toggleState('pending');
+				break;
+				default:
+					console.log('Unknown event received', msgEvt);
+					break;
+			}
+		}
+	});
+
 });
