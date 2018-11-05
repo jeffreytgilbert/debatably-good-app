@@ -144,7 +144,8 @@ const updateSessions = () => {
 								startTime: debate.startTime,
 								started: debate.started,
 								completed: debate.completed,
-								timeRemaining: debate.getTimeRemaining()
+								timeRemaining: debate.getTimeRemaining(),
+								duration: debate.getAllowedDuration()
 							},
 							audience: debate.getAudience().length > 0 ? 
 								debate.getAudience() : 

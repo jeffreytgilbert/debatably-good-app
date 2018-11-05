@@ -15,7 +15,7 @@ router.get('/', function(req, res, next) {
 			if (debate) {
 				const debateRole = session.activeDebates[sessionCode];
 				if (debateRole && debateRole.isVoter) {
-					let voter = debate.getVoterById(session.voterId);
+					let voter = debate.getVoterById(debateRole.voterId);
 					if (voter) {
 						res.render('vote-on-debate', {
 							title: debate.topic,

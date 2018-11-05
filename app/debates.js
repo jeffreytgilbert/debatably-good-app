@@ -52,6 +52,10 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 			(__.startTime + __.allowedDuration) - Date.now();
 	};
 
+	__.getAllowedDuration = function () {
+		return __.allowedDuration
+	}
+
 	__.getModeratorId = function () {
 		return moderatorId;
 	};
