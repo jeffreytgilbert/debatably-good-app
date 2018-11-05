@@ -311,6 +311,12 @@ wss.on('connection', (ws, req) => {
 
 	switch (path[1]) {
 		case 'create-debate':
+			let killableSessions = asm.deleteAllDebatesForThisModerator(session.userId);
+			// no idea if if this actually works for sessions.
+			killableSessions.forEach(closedSession => {
+				delete session.activeDebates[closedSession];
+			});
+			break;
 		case 'moderate-debate':
 			authenticateDebateSocketRequest(session, url, ws, moderatorSocketRouter);
 			break;

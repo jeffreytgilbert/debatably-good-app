@@ -14,12 +14,15 @@ const asm = {
 	},
 
 	deleteAllDebatesForThisModerator: function (userId) {
+		let sessionsRemoved = [];
 		for (let sessionCode in debateAppIndex) {
 			let debate = debateAppIndex[sessionCode];
 			if (debate.getModeratorId() === userId) {
+				sessionsRemoved.push(sessionCode);
 				asm.delete(sessionCode);
 			}
 		}
+		return sessionsRemoved;
 	},
 
 	// get debates that are running but not completed.
