@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	// Create WebSocket connection.
 	const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-	const socket = new WebSocket(protocol+'//'+location.host);
+	const socket = new WebSocket(protocol+'//'+location.host+'/create-debate/');
 
 	window['debugSocket'] = socket;
 

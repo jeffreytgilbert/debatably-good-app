@@ -34,11 +34,6 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 		return audience.map(voter => voter.name);
 	};
 
-	__.findVoterByPrivateId = function (privateId) {
-		const results = audience.filter(voter => voter.getPrivateVoterId() === privateId);
-		return results.length > 0 ? results[0] : null;
-	}
-	
 	// participants should be created on construction, but immutable for the duration of the debate
 	let participantA = makeParticipant(nameA);
 	let participantB = makeParticipant(nameB);
@@ -215,9 +210,9 @@ function Debate (sessionCode, topic, nameA, nameB, duration, moderatorId) {
 	};
 
 	__.getVoterById = function (id) {
-		const voter = audience.filter(v => v.getPrivateVoterId() === id);
-		return voter.length > 0 ? voter[0] : null;
-	};
+		const results = audience.filter(voter => voter.getPrivateVoterId() === id);
+		return results.length > 0 ? results[0] : null;
+	}	
 };
 
 module.exports = {

@@ -5,14 +5,13 @@ const router = express.Router();
 const asm = require('../app/application-state-manager');
 
 router.get('/', function(req, res, next) {
+	const session = req.session;
 
-	if (req.session.userId) {
+	if (session.userId) {
 		if (req.query.code) {
-	
 			const debate = asm.get(req.query.code);
-
 			if (debate) {
-				if(debate.getModeratorId() === req.session.userId) {
+				if(debate.getModeratorId() === session.userId) {
 					res.render('moderate-debate', {
 						title: debate.topic,
 						allowedDuration: debate.allowedDuration,

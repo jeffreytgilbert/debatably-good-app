@@ -1,7 +1,7 @@
 extends layout
 
 block content
-	form(action='/vote-on-debate', method='get') 
+	form(action='/', method='post') 
 		h3 Room code
 		input.u-full-width(type='text', name='sessionCode', autocomplete='off', maxlength='4')
 		h3 Your name

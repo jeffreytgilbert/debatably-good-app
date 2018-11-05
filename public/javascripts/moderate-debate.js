@@ -1,6 +1,7 @@
 var $ = window.$;
 var TweenMax = window.TweenMax;
 var Elastic = window.Elastic;
+var youWon = window.youWon;
 
 var errorHandler = function () {
 	$('#page').hide().after(
@@ -10,6 +11,7 @@ var errorHandler = function () {
 };
 
 var onVote;
+var sessionCode;
 
 var doChartStuff = function () {
 	var aBar = document.querySelector('#aBar');
@@ -18,10 +20,10 @@ var doChartStuff = function () {
 	//Hide connected text
 	connected.setAttribute('scale','0 0 0');
 	
-	let total = 0.001; //protect from div/0
-	let aVote = 0.0;
-	let bVote = 0.0;
-	let cVote = 0.0;
+	var total = 0.001; //protect from div/0
+	var aVote = 0.0;
+	var bVote = 0.0;
+	var cVote = 0.0;
 	
 	var scalar = 1;
 	var easing = 0.85;
@@ -64,7 +66,9 @@ var doChartStuff = function () {
 };
 
 
-document.addEventListener("DOMContentLoaded", function() {
+$(function() {
+
+	sessionCode = $('#audienceCode').text();
 
 	$('#chart').html(
 		'<a-scene embedded id="main" background="color: #000000">'+
@@ -88,7 +92,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	// Create WebSocket connection.
 	var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-	var socket = new WebSocket(protocol+'//'+location.host);
+	var socket = new WebSocket(protocol+'//'+location.host+'/moderate-debate/?sessionCode='+sessionCode);
 
 	window['debugSocket'] = socket;
 
@@ -132,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				'font-size': '6em',
 				opacity: '1',
 				ease: Elastic.easeOut,
-				onComplete: window.youWon
+				onComplete: youWon
 			}
 		);
 

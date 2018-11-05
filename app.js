@@ -58,6 +58,13 @@ app.set('view engine', 'jade');
 
 // manage 1 session per user middleware
 app.use(sessionParser);
+// initialize session data structure for all the routers to use
+app.use((req, res, next) => {
+	const session = req.session;
+	// Session store of debate info is keyed off of sessionCodes, so i need a map for that
+	if (!session.activeDebates) { session.activeDebates = {}; }
+	next();
+});
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -98,26 +105,18 @@ let socketConnections = [];
 
 /**
  * @param {WebSocket} ws 
- * @param {ConnectedUser} user 
  */
-let SessionToSocketMap = function (ws, user) {
+let SessionToSocketMap = function (ws, role) {
 	this.ws = ws;
-	this.user = user;
-};
-
-const ConnectedUser = function (isVoter, isModerator, userId, debate) {
-	this.isVoter = isVoter;
-	this.isModerator = isModerator;
-	this.userId = userId;
-	this.debate = debate;
+	this.role = role;
 };
 
 /**
  * @param {WebSocket} offendingWs 
  */
-const removeBadConnections = (offendingWs) => {
-	socketConnections.forEach((sessionToSocketMap, index) => {
-		if(sessionToSocketMap.ws === offendingWs) {
+const removeDeadSockets = (offendingWs) => {
+	socketConnections.forEach((s2sMap, index) => {
+		if(s2sMap.ws === offendingWs) {
 			delete socketConnections[index];
 		}
 	});
@@ -132,9 +131,10 @@ const updateSessions = () => {
 	
 	runningSessions.forEach(debate => {
 		socketConnections.forEach(connectedUser => {
-			if (connectedUser.user.isModerator && debate.getModeratorId() === connectedUser.user.userId) {
-				if (connectedUser.ws.readyState === WebSocket.OPEN) {
-					// console.log('updating', debate.sessionCode, 'for', debate.getModeratorId());
+			const role = connectedUser.role;
+			const socket = connectedUser.ws;
+			if (role.isModerator && debate.getModeratorId() === role.moderatorId) {
+				if (socket.readyState === WebSocket.OPEN) {
 					const message = JSON.stringify({
 						type: 'moderator-update', 
 						data: { 
@@ -146,10 +146,12 @@ const updateSessions = () => {
 								completed: debate.completed,
 								timeRemaining: debate.getTimeRemaining()
 							},
-							audience: debate.getAudience().length > 0 ? debate.getAudience() : ['nobody yet']
+							audience: debate.getAudience().length > 0 ? 
+								debate.getAudience() : 
+								['nobody yet']
 						}
 					});
-					connectedUser.ws.send(message);
+					socket.send(message);
 				}
 			}
 		})
@@ -160,20 +162,26 @@ const broadcastToVoters = (event, debate) => {
 	const message = JSON.stringify(event);
 
 	socketConnections.forEach(connectedUser => {
-		if (connectedUser.user.isVoter && connectedUser.user.debate === debate) {
-			if (connectedUser.ws.readyState === WebSocket.OPEN) {
-				connectedUser.ws.send(message);
+		const role = connectedUser.role;
+		const socket = connectedUser.ws;
+		if (role.isVoter && asm.get(role.sessionCode) === debate) {
+			if (socket.readyState === WebSocket.OPEN) {
+				socket.send(message);
 			}
 		}
 	});
 };
 
 const startDebate = (debate) => {
-	broadcastToVoters({type: 'start'}, debate);
+	broadcastToVoters({
+		type: 'start'
+	}, debate);
 };
 
 const endDebate = (debate) => {
-	broadcastToVoters({type: 'end'}, debate);
+	broadcastToVoters({
+		type: 'end'
+	}, debate);
 };
 
 setInterval(() => {
@@ -182,45 +190,31 @@ setInterval(() => {
 	}, 200
 );
 
+const role = require('./app/role');
+
 /**
  *  MANAGE ALL INBOUND COMMUNICATION
  * */
-const socketRequestHandler = (ws, session, debate) => {
+const recordSocketToDebateSession = (ws, session, debate, role) => {
+	socketConnections.push(new SessionToSocketMap(ws, role));
+	console.log('event received as:',  
+		',as moderator:', role.isModerator, 
+		',as voter:', role.isVoter,
+		',as session:', session.userId,
+		',for debate:', debate.sessionCode, 
+		',starting:', debate.startTime, 
+		',for this long:', debate.allowedDuration, 
+		',as started:', debate.started, 
+		',as completed:', debate.completed);
+};
 
-	const user = new ConnectedUser(
-		!!(session.voterId),
-		!!(session.moderatorId),
-		session.userId,
-		debate
-	);
-
-	socketConnections.push(new SessionToSocketMap(ws, user));
-
-	console.log(
-		'SessionToSocketMap',
-		socketConnections[socketConnections.length-1].user.isVoter,
-		socketConnections[socketConnections.length-1].user.isModerator,
-		socketConnections[socketConnections.length-1].user.userId,
-		debate.sessionCode
-	);
-
-	ws.on('message', (data) => {
-
-		const event = JSON.parse(data.toString());
-
-		console.log('event received as:', event, 
-			',as moderator:', user.isModerator, 
-			',as voter:', user.isVoter,
-			',as session:', user.userId,
-			',for debate:', user.debate.sessionCode, 
-			',starting:', user.debate.startTime, 
-			',for this long:', user.debate.allowedDuration, 
-			',as started:', user.debate.started, 
-			',as completed:', user.debate.completed);
-
-		if (user.isModerator) {
+const moderatorSocketRouter = (ws, session, debate, role) => {
+	if (role.isModerator) {
+		ws.on('message', (data) => {
+			const event = JSON.parse(data.toString());
+			console.log('Moderator event of type', event.type);
 			switch (event.type) {
-				case 'start-session': 
+				case 'start-session':
 					debate.startDebate(function endDebateCallback() {
 						endDebate(debate);
 					});
@@ -228,18 +222,26 @@ const socketRequestHandler = (ws, session, debate) => {
 					break;
 				case 'close-debate':
 				case 'close-any-existing-debates':
-					asm.deleteAllDebatesForThisModerator(user.userId);
+					asm.deleteAllDebatesForThisModerator(role.moderatorId);
+					// no idea if if this actually works for sessions.
+					delete session.activeDebates[debate.sessionCode];
 					break;
 				default:
 					console.log('Unkown event type received:', event.type);
 					break;
 			}
-		}
+		});
+	}
+};
 
-		if (user.isVoter) {
+const voterSocketRouter = (ws, session, debate, role) => {
+	if (role.isVoter) {
+		ws.on('message', (data) => {
+			const event = JSON.parse(data.toString());
+			console.log('Voter event of type', event.type);
 			switch (event.type) {
 				case 'vote': 
-					const voter = debate.getVoterById(user.userId);
+					const voter = debate.getVoterById(role.voterId);
 					voter.placeVote(event.data.participant);
 					break;
 				case 'voter-check-in': 
@@ -247,7 +249,7 @@ const socketRequestHandler = (ws, session, debate) => {
 					if (debate.completed) { state = 'end'; }
 					else if (debate.started) { state = 'start'; }
 					else { state = 'pending'; }
-
+	
 					ws.send(JSON.stringify({
 						type: state
 					}));
@@ -256,19 +258,44 @@ const socketRequestHandler = (ws, session, debate) => {
 					console.log('Unkown event type received:', event.type);
 					break;
 			}
-		}
-	});
-
-	ws.on('close', (code, reason) => {
-		console.log('Session closed', code, reason);
-		removeBadConnections(ws);
-	});
-
-	ws.on('error', (error) => {
-		console.log('error', error);
-		removeBadConnections(ws);
-	});
+		});
+	}
 };
+
+const querystring = require('querystring');
+
+const authenticateDebateSocketRequest = (session, url, ws, socketHandler) => {
+	console.log(url.query);
+	const qs = querystring.parse(url.query);
+	if (qs && qs.sessionCode) {
+		const sessionCode = ''+qs.sessionCode;
+		// Ops that go with socket functionality require the user to have a sessionCode
+		if (session.activeDebates) {
+			const role = session.activeDebates[sessionCode];
+			if (role) {
+				const debate = asm.get(sessionCode);
+				if (debate && debate.sessionCode) {
+					recordSocketToDebateSession(ws, session, debate, role);
+					socketHandler(ws, session, debate, role);
+					return true;
+				} else {
+					console.log('socket missing debate or debate session code');
+				}
+			} else {
+				console.log('socket missing role');
+			}
+		} else {
+			console.log('socket missing active debates');
+		}
+	} else {
+		console.log('socket missing "sessionCode" param');
+	}
+	// if we get here, the socket request was missing something. close it.
+	ws.close();
+	return false;
+};
+
+const URL = require('url');
 
 // on connection is different than on open in that you get request info 
 // you can use to parse things like session cookies and such, which we do and store.
@@ -276,15 +303,34 @@ wss.on('connection', (ws, req) => {
 	console.log('got a connection');
 
 	const session = req.session;
+	const url = URL.parse(req.url);
+	const path = url.pathname.split('/');
 
-	// Ops that go with socket functionality require the user to have a sessionCode
-	if (session.sessionCode) { 
-		const debate = asm.get(session.sessionCode);
-		if (debate && debate.sessionCode) {
-			socketRequestHandler(ws, session, debate);
-		}
+	console.log(url, path);
+
+	switch (path[1]) {
+		case 'create-debate':
+		case 'moderate-debate':
+			authenticateDebateSocketRequest(session, url, ws, moderatorSocketRouter);
+			break;
+		case 'vote-on-debate':
+			authenticateDebateSocketRequest(session, url, ws, voterSocketRouter);
+			break;
+		default:
+			console.log('Unsupported socket request type.');
+			break;
 	}
 	
+	ws.on('close', (code, reason) => {
+		console.log('Session closed', code, reason);
+		removeDeadSockets(ws);
+	});
+
+	// ws.on('error', (error) => {
+	// 	console.log('error', error);
+	// 	removeDeadSockets(ws);
+	// });
+
 });
 
 module.exports = { 

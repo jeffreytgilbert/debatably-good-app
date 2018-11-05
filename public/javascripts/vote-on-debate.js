@@ -9,11 +9,15 @@ var errorHandler = function () {
 	);
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+var sessionCode;
+
+$(function() {
+
+	sessionCode = $('#sessionCode').text();
 
 	// Create WebSocket connection.
 	var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-	var socket = new WebSocket(protocol+'//'+location.host);
+	var socket = new WebSocket(protocol+'//'+location.host+'/vote-on-debate/?sessionCode='+sessionCode);
 
 	window['debugSocket'] = socket;
 
