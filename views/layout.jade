@@ -18,7 +18,12 @@ html
 		link(rel='icon', type='image/png', href='images/favicon.png')
 
 		script(src='//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js')
+		//- script(src='//cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js')
 		script(src='//aframe.io/releases/0.8.2/aframe.min.js')
+		script(src='//cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/TweenMax.min.js')
+		script(src='//cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/easing/EasePack.min.js')
+		script(src='/javascripts/confetti.js')
 
 	body
-		block content
+		.wrapper
+			block content
