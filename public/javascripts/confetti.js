@@ -5,7 +5,8 @@ function youWon () {
 
 	$(document.body).css({
 		margin: 0,
-		overflow: 'hidden'
+		'overflow-x': 'hidden',
+		'overflow-y': 'scroll'
 	});
 
 	for (var i = 0; i < 250; i++) {

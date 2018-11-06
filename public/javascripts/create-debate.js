@@ -11,4 +11,6 @@ document.addEventListener("DOMContentLoaded", function() {
 		socket.send('{"type":"close-any-existing-debates"}');
 	});
 
+	// TODO make sure Option A and Option B cannot be equivalent, otherwise you get a runtime oddity where the result is always a tie.
+
 });

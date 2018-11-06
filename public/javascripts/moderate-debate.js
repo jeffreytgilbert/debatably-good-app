@@ -110,20 +110,31 @@ $(function() {
 	var showTotals = function (oA, oB, oC) {
 		var grandTotal = parseInt(oA.total,10) + parseInt(oB.total,10) + parseInt(oC.total,10);
 
-		return '<table style="width:80%">'+
+		var drawRow = (label, total, isHappy) => {
+			return '<tr>'+
+				'<td>'+(isHappy?'😄':'😭')+'&nbsp;'+label+'</td>'+
+				'<td style="text-align:right;">'+Math.round((total/grandTotal)*100)+'%</td>'+
+			'</tr>';
+		}
+
+		var resultMarkup;
+		if (totals['A'] > totals['B']) {
+			resultMarkup = drawRow(oA.label, oA.total, true)+drawRow(oB.label, oB.total, false)
+		} else if (totals['A'] < totals['B']) {
+			resultMarkup = drawRow(oB.label, oB.total, true)+drawRow(oA.label, oA.total, false)
+		} else {
+			resultMarkup = drawRow(oA.label, oA.total, false)+drawRow(oB.label, oB.total, false)
+		}
+
+		return '<table style="width:100%;font-size:2em;">'+
+			resultMarkup+
 			'<tr>'+
-				'<td>'+oA.label+'</td>'+
-				'<td>'+Math.round((oA.total/grandTotal)*100)+'%</td>'+
+				'<td style="border-bottom:0;">'+oC.label+'</td>'+
+				'<td style="text-align:right;border-bottom:0;">'+Math.round((oC.total/grandTotal)*100)+'%</td>'+
 			'</tr>'+
-			'<tr>'+
-				'<td>'+oB.label+'</td>'+
-				'<td>'+Math.round((oB.total/grandTotal)*100)+'%</td>'+
-			'</tr>'+
-			'<tr>'+
-				'<td>'+oC.label+'</td>'+
-				'<td>'+Math.round((oC.total/grandTotal)*100)+'%</td>'+
-			'</tr>'+
-		'<table>'
+		'<table>'+
+		'<br><br><br>'+
+		'<a href="javascript:location.href=\'/create-debate\'">more please</a>'
 	};
 
 	var animateWinnerIn = function(details) {

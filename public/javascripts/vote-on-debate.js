@@ -18,6 +18,14 @@ var errorHandler = function () {
 
 var sessionCode;
 
+var flip = function (A, B) {  
+	if (Math.floor(Math.random() * 2) === 0){
+		return A;
+	} else {
+		return B;
+	}
+};
+
 $(function() {
 
 	sessionCode = $('#sessionCode').text();
@@ -44,9 +52,13 @@ $(function() {
 		src: ['/images/Crowd-Boo-1-SoundBible.com-183064743.mp3']
 	});
 
-	// var kidLaughingSound = new Howl({
-	// 	src: ['/images/SMALL_CROWD_APPLAUSE-Yannick_Lemieux-1268806408.mp3']
-	// });
+	var kidLaughingSound = new Howl({
+		src: ['/images/Kid_Laugh-Mike_Koenig-1673908713.mp3']
+	});
+
+	var kidLaughingShortSound = new Howl({
+		src: ['/images/Kid-Laughing-Short-SoundBible.com-667826932.mp3']
+	});
 
 	// var yeySound = new Howl({
 	// 	src: ['/images/1_person_cheering-Jett_Rifkin-1851518140.mp3']
@@ -54,7 +66,7 @@ $(function() {
 
 	// Put some toys on the hold screen
 	$('#twiddle').click(evt => {
-		airhornSound.play();
+		flip(kidLaughingSound, kidLaughingShortSound).play();
 	});
 
 	var A = $('#voteForA'),
@@ -123,33 +135,36 @@ $(function() {
 		requestInitialStatus();
 	});
 
-	var flip = function () {  
-		if (Math.floor(Math.random() * 2) === 0){
-			return largeApplauseSound;
-		} else {
-			return applauseSound;
-		}
-	};
-
 	var totals = { A: 0, B: 0 };
 
 	var showTotals = function (oA, oB, oC) {
 		var grandTotal = parseInt(oA.total,10) + parseInt(oB.total,10) + parseInt(oC.total,10);
 
-		return '<table style="width:80%">'+
+		var drawRow = (label, total, isHappy) => {
+			return '<tr>'+
+				'<td>'+(isHappy?'😄':'😭')+'&nbsp;'+label+'</td>'+
+				'<td style="text-align:right;">'+Math.round((total/grandTotal)*100)+'%</td>'+
+			'</tr>';
+		}
+
+		var resultMarkup;
+		if (totals['A'] > totals['B']) {
+			resultMarkup = drawRow(oA.label, oA.total, true)+drawRow(oB.label, oB.total, false)
+		} else if (totals['A'] < totals['B']) {
+			resultMarkup = drawRow(oB.label, oB.total, true)+drawRow(oA.label, oA.total, false)
+		} else {
+			resultMarkup = drawRow(oA.label, oA.total, false)+drawRow(oB.label, oB.total, false)
+		}
+
+		return '<table style="width:100%;font-size:1.5em;">'+
+			resultMarkup+
 			'<tr>'+
-				'<td>'+oA.label+'</td>'+
-				'<td>'+Math.round((oA.total/grandTotal)*100)+'%</td>'+
+				'<td style="border-bottom:0;">'+oC.label+'</td>'+
+				'<td style="text-align:right;border-bottom:0;">'+Math.round((oC.total/grandTotal)*100)+'%</td>'+
 			'</tr>'+
-			'<tr>'+
-				'<td>'+oB.label+'</td>'+
-				'<td>'+Math.round((oB.total/grandTotal)*100)+'%</td>'+
-			'</tr>'+
-			'<tr>'+
-				'<td>'+oC.label+'</td>'+
-				'<td>'+Math.round((oC.total/grandTotal)*100)+'%</td>'+
-			'</tr>'+
-		'<table>'
+		'<table>'+
+		'<br><br><br>'+
+		'<a href="javascript:location.href=\'/\'">more please</a>'
 	};
 
 	var animateWinnerIn = function (details) {
@@ -182,7 +197,7 @@ $(function() {
 			);
 
 		if (!isItATie) {
-			flip().play();
+			flip(applauseSound, largeApplauseSound).play();
 		} else {
 			booSound.play();
 		}

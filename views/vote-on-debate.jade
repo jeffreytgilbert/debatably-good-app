@@ -5,10 +5,14 @@ block content
 	#page
 		#sessionCode.hidden #{sessionCode}
 
-		h3#sessionIsPending.hidden 
-			span Turn the sound up and click!
+		h3#sessionIsPending.hidden(style='text-align:center') 
+			span Turn the sound up! 
 			br
-			button#twiddle.button-primary Make some noise!
+			br
+			span click!
+			br
+			br
+			button#twiddle.button-primary.u-full-width Make some noise!
 
 		div#sessionOver.hidden 
 			
