@@ -133,7 +133,26 @@ $(function() {
 
 	var totals = { A: 0, B: 0 };
 
-	var animateWinnerIn = function(details) {
+	var showTotals = function (oA, oB, oC) {
+		var grandTotal = parseInt(oA.total,10) + parseInt(oB.total,10) + parseInt(oC.total,10);
+
+		return '<table style="width:80%">'+
+			'<tr>'+
+				'<td>'+oA.label+'</td>'+
+				'<td>'+Math.round((oA.total/grandTotal)*100)+'%</td>'+
+			'</tr>'+
+			'<tr>'+
+				'<td>'+oB.label+'</td>'+
+				'<td>'+Math.round((oB.total/grandTotal)*100)+'%</td>'+
+			'</tr>'+
+			'<tr>'+
+				'<td>'+oC.label+'</td>'+
+				'<td>'+Math.round((oC.total/grandTotal)*100)+'%</td>'+
+			'</tr>'+
+		'<table>'
+	};
+
+	var animateWinnerIn = function (details) {
 		var winner,
 			isItATie = false;
 		
@@ -153,9 +172,12 @@ $(function() {
 			.css({ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 })
 			.html(
 				'<div style="width:40%;margin-top:20%;text-align:center;margin-left:30%;margin-right:30%;">' +
-					'<h2 id="winner">' +
+					'<h2 id="winner" style="text-align:center;">' +
 					winner +
 					'</h2>' +
+					'<br>' +
+					'<br>' +
+					showTotals(details.participantA, details.participantB, details.undecided) +
 				'</div>'
 			);
 
@@ -175,7 +197,7 @@ $(function() {
 			},
 			// to vars
 			{
-				'font-size': '6em',
+				'font-size': '3em',
 				opacity: '1',
 				ease: Elastic.easeOut,
 				onComplete: () => {
@@ -203,7 +225,7 @@ $(function() {
 
 				case 'end':
 					toggleState('over');
-					console.log(event.data.results);
+//					console.log(event.data.results);
 					unbindHandlers();
 					
 					animateWinnerIn(event.data.results);
@@ -226,7 +248,6 @@ $(function() {
 						debateDetails.timeRemaining / 1000
 					);
 
-					console.log('keepalive ping');
 					break;
 				default:
 					console.log('Unknown event received', msgEvt);

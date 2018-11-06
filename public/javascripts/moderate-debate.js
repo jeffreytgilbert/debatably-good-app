@@ -73,7 +73,6 @@ var renderLoop = () => {
 	scaleBars(bBar, bVote);
 	scaleBars(cBar, cVote);
 	quitFlag || requestAnimationFrame(renderLoop);
-	console.log(':X');
 };
 
 $(function() {
@@ -108,7 +107,26 @@ $(function() {
 
 	var totals = { A: 0, B: 0 };
 
-	var animateWinnerIn = function() {
+	var showTotals = function (oA, oB, oC) {
+		var grandTotal = parseInt(oA.total,10) + parseInt(oB.total,10) + parseInt(oC.total,10);
+
+		return '<table style="width:80%">'+
+			'<tr>'+
+				'<td>'+oA.label+'</td>'+
+				'<td>'+Math.round((oA.total/grandTotal)*100)+'%</td>'+
+			'</tr>'+
+			'<tr>'+
+				'<td>'+oB.label+'</td>'+
+				'<td>'+Math.round((oB.total/grandTotal)*100)+'%</td>'+
+			'</tr>'+
+			'<tr>'+
+				'<td>'+oC.label+'</td>'+
+				'<td>'+Math.round((oC.total/grandTotal)*100)+'%</td>'+
+			'</tr>'+
+		'<table>'
+	};
+
+	var animateWinnerIn = function(details) {
 		var winner,
 			isItATie = false;
 
@@ -131,7 +149,10 @@ $(function() {
 					'<h1 id="winner">' +
 					winner +
 					'</h1>' +
-					'</div>'
+					'<br>' +
+					'<br>' +
+					showTotals(details.participantA, details.participantB, details.undecided) +
+				'</div>'
 			);
 
 		quitFlag = true;
@@ -218,7 +239,7 @@ $(function() {
 							socket.removeEventListener('error', handleSocketError);
 							socket.send(JSON.stringify(request));
 							socket.close();
-							animateWinnerIn();
+							animateWinnerIn(chartData);
 						} else {
 							$('#timeRemaining')
 								.removeClass('hidden')
