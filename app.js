@@ -159,7 +159,7 @@ const updateSessions = () => {
 	});
 };
 
-const broadcastToVoters = (event, debate) => {
+const broadcastToVotersOfOneDebate = (event, debate) => {
 	const message = JSON.stringify(event);
 
 	socketConnections.forEach(connectedUser => {
@@ -173,23 +173,43 @@ const broadcastToVoters = (event, debate) => {
 	});
 };
 
+const broadcastToAllVoters = (event) => {
+	const message = JSON.stringify(event);
+
+	socketConnections.forEach(connectedUser => {
+		const role = connectedUser.role;
+		const socket = connectedUser.ws;
+		if (role.isVoter) {
+			if (socket.readyState === WebSocket.OPEN) {
+				socket.send(message);
+			}
+		}
+	});
+};
+
 const startDebate = (debate) => {
-	broadcastToVoters({
+	broadcastToVotersOfOneDebate({
 		type: 'start'
 	}, debate);
 };
 
 const endDebate = (debate) => {
-	broadcastToVoters({
+	broadcastToVotersOfOneDebate({
 		type: 'end'
 	}, debate);
 };
 
-setInterval(() => {
-	// console.log('update sessions', Date.now());
-		updateSessions();
-	}, 200
-);
+const socketKeepalive = () => {
+	updateSessions();
+
+	broadcastToAllVoters({
+		type: 'oh-hi'
+	});
+
+	setTimeout(socketKeepalive, 250);
+};
+
+socketKeepalive();
 
 const role = require('./app/role');
 
