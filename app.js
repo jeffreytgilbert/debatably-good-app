@@ -133,27 +133,38 @@ const updateSessions = () => {
 		socketConnections.forEach(connectedUser => {
 			const role = connectedUser.role;
 			const socket = connectedUser.ws;
-			if (role.isModerator && debate.getModeratorId() === role.moderatorId) {
-				if (socket.readyState === WebSocket.OPEN) {
-					const message = JSON.stringify({
+			if (socket.readyState === WebSocket.OPEN) {
+				let message;
+				if (role.isModerator && debate.getModeratorId() === role.moderatorId) {
+					message = JSON.stringify({
 						type: 'moderator-update', 
 						data: { 
 							chartData: debate.calculateDebateResults(),
 							debateDetails: {
-								allowedDuration: debate.allowedDuration,
+								allowedDuration: debate.allowedDuration, // TODO erase one of these
+								duration: debate.getAllowedDuration(), // TODO erase one of these
 								startTime: debate.startTime,
 								started: debate.started,
 								completed: debate.completed,
-								timeRemaining: debate.getTimeRemaining(),
-								duration: debate.getAllowedDuration()
+								timeRemaining: debate.getTimeRemaining()
 							},
 							audience: debate.getAudience().length > 0 ? 
 								debate.getAudience() : 
 								['nobody yet']
 						}
 					});
-					socket.send(message);
+				} else {
+					message = JSON.stringify({
+						type: 'voter-update', 
+						data: { 
+							chartData: debate.calculateDebateResults(),
+							debateDetails: {
+								timeRemaining: debate.getTimeRemaining()
+							}
+						}
+					});
 				}
+				socket.send(message);
 			}
 		})
 	});
@@ -188,28 +199,35 @@ const broadcastToAllVoters = (event) => {
 };
 
 const startDebate = (debate) => {
+	console.log('this is the beginning', debate.sessionCode);
 	broadcastToVotersOfOneDebate({
 		type: 'start'
 	}, debate);
 };
 
 const endDebate = (debate) => {
+	console.log('this is the end', debate.sessionCode);
 	broadcastToVotersOfOneDebate({
-		type: 'end'
+		type: 'end',
+		data: {
+			results: debate.calculateDebateResults()
+		}
 	}, debate);
 };
 
-const socketKeepalive = () => {
+const socketModeratorKeepalive = () => {
 	updateSessions();
 
+	setTimeout(socketModeratorKeepalive, 250);
+};
+
+const socketVoterKeepalive = () => {
 	broadcastToAllVoters({
 		type: 'oh-hi'
 	});
 
-	setTimeout(socketKeepalive, 250);
-};
-
-socketKeepalive();
+	setTimeout(socketVoterKeepalive, 20 * 1000); // every 20 seconds (heroku will timeout at 30 or 55 seconds otherwise)
+}
 
 const role = require('./app/role');
 
@@ -237,15 +255,19 @@ const moderatorSocketRouter = (ws, session, debate, role) => {
 			switch (event.type) {
 				case 'start-session':
 					debate.startDebate(function endDebateCallback() {
+						console.log('debate timeout hit');
 						endDebate(debate);
 					});
 					startDebate(debate);
 					break;
 				case 'close-debate':
 				case 'close-any-existing-debates':
-					asm.deleteAllDebatesForThisModerator(role.moderatorId);
-					// no idea if if this actually works for sessions.
-					delete session.activeDebates[debate.sessionCode];
+					// delay this from happening so everyone gets a chance to quick refresh and all
+					setTimeout(() => {
+						asm.deleteAllDebatesForThisModerator(role.moderatorId);
+						// no idea if if this actually works for sessions.
+						delete session.activeDebates[debate.sessionCode];
+					}, 2000);
 					break;
 				default:
 					console.log('Unkown event type received:', event.type);
@@ -286,7 +308,6 @@ const voterSocketRouter = (ws, session, debate, role) => {
 const querystring = require('querystring');
 
 const authenticateDebateSocketRequest = (session, url, ws, socketHandler) => {
-	console.log(url.query);
 	const qs = querystring.parse(url.query);
 	if (qs && qs.sessionCode) {
 		const sessionCode = ''+qs.sessionCode;
@@ -321,13 +342,11 @@ const URL = require('url');
 // on connection is different than on open in that you get request info 
 // you can use to parse things like session cookies and such, which we do and store.
 wss.on('connection', (ws, req) => {
-	console.log('got a connection');
-
 	const session = req.session;
 	const url = URL.parse(req.url);
 	const path = url.pathname.split('/');
 
-	console.log(url, path);
+	console.log('ws request as', url);
 
 	switch (path[1]) {
 		case 'create-debate':
@@ -359,6 +378,9 @@ wss.on('connection', (ws, req) => {
 	// });
 
 });
+
+socketModeratorKeepalive();
+socketVoterKeepalive();
 
 module.exports = { 
 	app: app, 

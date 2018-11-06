@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const asm = require('../app/application-state-manager');
+const h2t = require('html-to-text');
 
 const generateUniqueRoomCode = () => {
 	const generateRandomCode = require('../app/generate-random-code');
@@ -10,6 +11,10 @@ const generateUniqueRoomCode = () => {
 	const existingRoom = asm.get(sessionCode);
 	return !existingRoom ? sessionCode : generateUniqueRoomCode();
 };
+
+const sanitize = function (input) {
+	return h2t.fromString(input, { longWordSplit: { forceWrapOnLimit: 11 } }).toUpperCase();
+}
 
 router.get('/', (req, res, next) => {
 	const session = req.session;
@@ -35,9 +40,9 @@ router.post('/', (req, res, next) => {
 			
 			// create a debate object and store it in the global memory space
 			const debate = asm.add(sessionCode,
-				req.body.topic,
-				req.body.participantA,
-				req.body.participantB,
+				sanitize(req.body.topic),
+				sanitize(req.body.participantA),
+				sanitize(req.body.participantB),
 				(parseInt(req.body.duration, 10) * 60 * 1000), // 1000 ms + 60 seconds in a min
 				session.userId
 			);

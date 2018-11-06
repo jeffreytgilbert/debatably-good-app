@@ -3,7 +3,7 @@ extends layout
 block content
 	form(action='/', method='post') 
 		h3 Room code
-		input.u-full-width(type='text', name='sessionCode', autocomplete='off', maxlength='4')
+		input.u-full-width(type='text', name='sessionCode', autocomplete='off', maxlength='4', style='text-transform:uppercase')
 		h3 Your name
 		input.u-full-width(type='text', name='name', maxlength='22')
 		br

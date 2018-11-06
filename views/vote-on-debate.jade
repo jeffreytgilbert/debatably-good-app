@@ -4,15 +4,14 @@ block content
 
 	#page
 		#sessionCode.hidden #{sessionCode}
-		
+
 		h3#sessionIsPending.hidden 
-			span The debate will begin shortly. 
+			span Turn the sound up and click!
 			br
-			span Thanks for your patience.
-		h3#sessionOver.hidden 
-			span The debate is over. 
-			br
-			span Thanks for voting!
+			button#twiddle.button-primary Make some noise!
+
+		div#sessionOver.hidden 
+			
 
 		#sessionIsLive.hidden
 			button#voteForA.u-full-width.game-button #{participantA}
