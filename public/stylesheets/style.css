@@ -10,10 +10,10 @@ input, select {
 
 #chart {
   min-width: 95%;
-  height: 600px;
+  height: 35vh;
 }
 
-#chart a-scene { display: block; width: 100%; height: 600px }
+#chart a-scene { display: block; width: 100%; height: 100% }
 
 #currentVote {
 	padding: 50px;
