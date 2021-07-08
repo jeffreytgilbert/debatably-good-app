@@ -11,7 +11,7 @@ router.get('/', function(req, res, next) {
 		const uuid = require('uuid').v4();
 		session.userId = uuid;
 	}
-	res.render('index', {});
+	res.render('index', {title:'Welcome stranger'});
 });
 
 router.post('/', function(req, res, next) {

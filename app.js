@@ -8,16 +8,16 @@ const logger = require('morgan');
 
 // session handling for 1 vote per user sessions
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
+//const SQLiteStore = require('connect-sqlite3')(session);
 
 const securityToken = require('uuid').v4();
 
 const sessionParser = session({
-	saveUninitialized: false,
+	saveUninitialized: true,
 	resave: false,
-	store: new SQLiteStore,
+	// store: new SQLiteStore,
 	secret: '$eCuRiTy',
-	cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // 1 week
+	cookie: { maxAge: 2 * 24 * 60 * 60 * 1000 } // 2 days
 });
 
 // pull in the debate app logic
@@ -98,7 +98,7 @@ app.use(function(err, req, res, next) {
 
 	// render the error page
 	res.status(err.status || 500);
-	res.render('error');
+	res.render('error', {title:'Oops!'});
 });
 
 let socketConnections = [];

@@ -22,7 +22,7 @@ router.get('/', (req, res, next) => {
 		const uuid = require('uuid').v4();
 		session.userId = uuid;
 	}
-	res.render('create-debate', {});
+	res.render('create-debate', {title:'Create a debate!'});
 });
 
 router.post('/', (req, res, next) => {
