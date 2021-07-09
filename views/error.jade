@@ -2,6 +2,7 @@ extends layout
 
 block content
 	h1= message
-	h2= error.status
+	h2= status
+	h3= sessionId
 
-	pre #{error.stack}
+	pre #{stack}

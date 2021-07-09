@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const asm = require('../app/application-state-manager');
-const h2t = require('html-to-text');
+const { htmlToText } = require('html-to-text');
 
 router.get('/', function(req, res, next) {
 	const session = req.session;
@@ -22,7 +22,7 @@ router.post('/', function(req, res, next) {
 		if (req.body.sessionCode &&
 			req.body.name
 		) {
-			const sessionCode = h2t.fromString(req.body.sessionCode, { longWordSplit: { forceWrapOnLimit: 11 } }).toUpperCase();
+			const sessionCode = htmlToText(req.body.sessionCode, { longWordSplit: { forceWrapOnLimit: 11 } }).toUpperCase();
 			const debate = asm.get(sessionCode);
 			if (debate) {
 				if (debate.getModeratorId() !== session.userId) {

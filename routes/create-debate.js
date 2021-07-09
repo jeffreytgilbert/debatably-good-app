@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const asm = require('../app/application-state-manager');
-const h2t = require('html-to-text');
+const { htmlToText } = require('html-to-text');
 
 const generateUniqueRoomCode = () => {
 	const generateRandomCode = require('../app/generate-random-code');
@@ -13,7 +13,7 @@ const generateUniqueRoomCode = () => {
 };
 
 const sanitize = function (input) {
-	return h2t.fromString(input, { longWordSplit: { forceWrapOnLimit: 11 } }).toUpperCase();
+	return htmlToText(input, { longWordSplit: { forceWrapOnLimit: 11 } }).toUpperCase();
 }
 
 router.get('/', (req, res, next) => {
